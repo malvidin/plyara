@@ -74,7 +74,8 @@ class Meta:
 
 
 class MetaSection:
-    def __init__(self, meta_list: List[Meta] = None, sort_key: Callable = None):
+    def __init__(self, meta_list: List[Meta] = None,
+                 sort_key: Callable = lambda meta: (meta.meta_type.value, meta.identifier, meta.value)):
         self._section_name = 'meta'
         self.sort_key = sort_key
         self.meta_list = meta_list if meta_list is not None else list()
@@ -129,8 +130,10 @@ class MetaSection:
             yield meta
 
     def sorted(self):
-        self.sort_key = lambda meta: (meta.meta_type.value, meta.identifier, meta.value)
         return sorted(self.meta_list, key=self.sort_key)
+
+    def sort(self):
+        self.meta_list = sorted(self.meta_list, key=self.sort_key)
 
     def __str__(self):
         if not self.meta_list:
@@ -497,7 +500,8 @@ class Literals(Expression):
             mod_str = ''
             if self.flags:
                 if self.flags.check_compatibility(StringTypes.CONDITION_REGEXP):
-                    mod_str = ''.join(flag.name for flag in Modifiers if flag & self.flags and flag is not Modifiers.ALL)
+                    mod_str = ''.join(
+                        flag.name for flag in Modifiers if flag & self.flags and flag is not Modifiers.ALL)
             return '/{!s}/{}'.format(self.expr, mod_str)
         elif self.type is LiteralTypes.float:
             return '{!s}'.format(self.expr)
@@ -1001,9 +1005,22 @@ class YaraRule:
         assert isinstance(self.meta, MetaSection)
         assert isinstance(self.strings, StringsSection)
         assert isinstance(self.condition, ConditionSection)
+        self.indent = '\t'
         # self.start_line = None
         # self.end_line = None
         # self.comments = list()
+
+    @property
+    def indent(self):
+        return self.__indent
+
+    @indent.setter
+    def indent(self, value):
+        if not re.match(r'^([ ]+|[\t]+)\Z', value):
+            raise ValueError('Indentation characters must be spaces or tabs')
+        for section in (self.meta, self.strings, self.condition):
+            section.indent = value
+        self.__indent = value
 
     @property
     def name(self):
@@ -1026,6 +1043,7 @@ class YaraRule:
             rule_hdr = rule_hdr + ' : {!s}'.format(' '.join(self.tags))
         rule_body = ''
         for section in (self.meta, self.strings, self.condition):
+            section.indent = self.indent
             rule_body += str(section)
         rule_str = '{!s}\n{{\n{!s}}}\n'.format(rule_hdr, rule_body)
         return rule_str
@@ -1082,7 +1100,7 @@ class YaraRuleSet:
     def __getitem__(self, item):
         if isinstance(item, int):
             return self.rules[item]
-        if item in ('import', 'include', ):
+        if item in ('imports', 'includes',):
             return getattr(self, item)
         elif item in RESERVED_KEYWORDS:
             raise ValueError(f'Reserved keyword, {item}, cannot be a rule name.')

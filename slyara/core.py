@@ -38,7 +38,7 @@ class BaseLexer(Lexer):
         NOT, AND, OR, AT, IN, OF, THEM, FOR, ALL,
         ANY, ENTRYPOINT, FILESIZE, MATCHES, CONTAINS,
         STRING_COUNT, STRING_OFFSET, STRING_LENGTH, INTEGER_FUNCTION,
-        SL_COMMENT, COMMENT,
+        # SL_COMMENT, COMMENT,
     }
 
     IDENTIFIER['import'] = IMPORT
@@ -130,7 +130,8 @@ class TextStringLexer(Lexer):
         self._COLLECT += t.value
 
     @_(r'\"')
-    def TEXT_STRING(self, t):
+    def TEXT_STRING_end(self, t):
+        t.type = 'TEXT_STRING'
         t.value = self._COLLECT
         self._COLLECT = ''
         self.pop_state()
@@ -808,7 +809,7 @@ class YaraParser(Parser):
 
     @_('REGEXP')
     def regexp(self, p):
-        return p.REGEXP
+        return Literals(p.REGEXP[0], LiteralTypes.regexp, p.REGEXP[1])
 
     @_('expression')
     def boolean_expression(self, p):
@@ -923,11 +924,11 @@ class YaraParser(Parser):
     def expression(self, p):
         return p.primary_expression
 
-    @_('"(" expression ")"')  # TODO - fix shift/reduce ambiguity
+    @_('"(" expression ")"')  # TODO - fix shift/reduce ambiguity, see "(" primary_expression ")"
     def expression(self, p):
         return Group(p.expression)
 
-    @_(' "(" integer_enumeration ")" ')
+    @_('"(" integer_enumeration ")"')
     def integer_set(self, p):
         return Enum(p.integer_enumeration)
 
@@ -1026,7 +1027,7 @@ class YaraParser(Parser):
     def iterator(self, p):
         return p.integer_set
 
-    @_('"(" primary_expression ")"')
+    @_('"(" primary_expression ")"')   # TODO - fix shift/reduce ambiguity, see "(" expression ")"
     def primary_expression(self, p):
         return Group(p.primary_expression)
 
@@ -1162,10 +1163,3 @@ class Slyara:
 
     def parse_string(self, input_string: str) -> YaraRuleSet:
         return self.parse_rule(source=input_string)
-
-if __name__ == '__main__':
-    with open('../tests/data/import_ruleset_cuckoo.yar') as f:
-        yl = YaraLexer()
-        for tok in yl.tokenize(f.read()):
-            pass
-            print(tok)
