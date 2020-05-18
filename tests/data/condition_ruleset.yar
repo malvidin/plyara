@@ -1,4 +1,8 @@
 rule image_filetype {
+    strings:
+        $eval = "eval"
+        $keys = "keys"
+        $a = "a"
     condition:
         (
             uint32be(0x00) == 0x89504E47 or // PNG

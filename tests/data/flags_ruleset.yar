@@ -1,16 +1,16 @@
 // This ruleset is used for unit tests - Modification will require test updates
 
-global rule GlobalScope
+global rule GlobalFlags
 {
     condition: false
 }
 
-private rule PrivateScope
+private rule PrivateFlags
 {
     condition: false
 }
 
-global private rule PrivateGlobalScope
+global private rule PrivateGlobalFlags
 {
     condition: false
 }

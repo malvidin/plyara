@@ -120,15 +120,15 @@ rule test { condition: "abc" < "abc"}
 
 
 // Arithmetic operators
-rule test { condition: (1 + 1) * 2 == (9 - 1) \\ 2 }
+rule test { condition: (1 + 1) * 2 == (9 - 1) \ 2 }
 
 rule test { condition: 5 % 2 == 1 }
 
 rule test { condition: 1.5 + 1.5 == 3}
 
-rule test { condition: 3 \\ 2 == 1}
+rule test { condition: 3 \ 2 == 1}
 
-rule test { condition: 3.0 \\ 2 == 1.5}
+rule test { condition: 3.0 \ 2 == 1.5}
 
 rule test { condition: 1 + -1 == 0}
 
@@ -651,7 +651,8 @@ rule test { condition: entrypoint >= 0 }
 
 
 // Test file size
-rule test { condition: filesize == %zd }
+// rule test { condition: filesize == %zd }  // %zd is not the filesize in Python, change the value below if modified
+rule test { condition: filesize == 22761 }
 
 
 // Test comments

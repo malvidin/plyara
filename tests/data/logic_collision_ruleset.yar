@@ -18,11 +18,10 @@ rule Set001_Rule002
         $b
 }
 
-/*
 // Although they match identical content as the above two rules,
 // the following four rules do not yet return the same hash.
 
-rule Set001_Rule003
+rule Set001a_Rule003
 {
     strings:
         $aaa = "foobar"
@@ -31,7 +30,7 @@ rule Set001_Rule003
         any of ($*)
 }
 
-rule Set001_Rule004
+rule Set001a_Rule004
 {
     strings:
         $ = "foobar"
@@ -40,7 +39,7 @@ rule Set001_Rule004
         any of them
 }
 
-rule Set001_Rule005
+rule Set001b_Rule005
 {
     strings:
         $ = "foobar"
@@ -49,16 +48,33 @@ rule Set001_Rule005
         all of ($*)
 }
 
-rule Set001_Rule006
+rule Set001b_Rule006
 {
     strings:
         $ = "foobar"
 
     condition:
-            all of them
+        all of them
 }
 
-*/
+rule Set001c_Rule007
+{
+    strings:
+        $ = "foobar"
+
+    condition:
+        for any of them : ($)
+}
+
+rule Set001c_Rule008
+{
+    strings:
+        $ = "foobar"
+
+    condition:
+        for any of ($*) : ($)
+}
+
 
 rule Set002_Rule001
 {

@@ -1,12 +1,13 @@
 rule FirstRule
 {
 	strings:
-		$a = "hark, a \"string\" here" fullword ascii
-		$b = { 00 22 44 66 88 aa cc ee }
+		$a = "hark, a \"string\" here" ascii fullword
+		$b = { 00 22 44 66 88 AA CC EE }
 
 	condition:
 		all of them
 }
+
 rule SecondRule : aTag
 {
 	strings:
@@ -15,10 +16,11 @@ rule SecondRule : aTag
 		$z = "bye"
 
 	condition:
-		for all of them : (#>2)
+		for all of them : ( # > 2 )
 }
+
 rule ForthRule
 {
 	condition:
-		uint8(0)^unit8(1)==0x12
+		uint8(0) ^ unit8(1) == 0x12
 }
